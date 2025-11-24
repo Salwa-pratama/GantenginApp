@@ -24,7 +24,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-
+import com.gantenginapp.apps.model.User
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -34,7 +34,9 @@ class ProfileActivity : ComponentActivity() {
         setContent {
             ProfileScreen(
                 onBackClick = {},
-                onRegistStoreClick = {}
+                onRegistStoreClick = {},
+                user = null,
+                onGoToMyStore = {}
             )
         }
     }
@@ -42,9 +44,22 @@ class ProfileActivity : ComponentActivity() {
 
 @Composable
 fun ProfileScreen(
+    user: User?,
     onBackClick : () -> Unit,
-    onRegistStoreClick: () -> Unit
+    onRegistStoreClick: () -> Unit,
+    onGoToMyStore: () -> Unit
 ) {
+    val textToko = if (user?.role == "admin-toko") {
+        "Toko Anda"
+    } else {
+        "Pendaftaran Toko"
+    }
+
+    val onTokoClick = if (user?.role == "admin-toko") {
+        onGoToMyStore
+    } else {
+        onRegistStoreClick
+    }
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -101,13 +116,14 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Info boxes
-            ProfileItem(icon = Icons.Default.Person, text = "User name")
-            ProfileItem(icon = Icons.Default.Phone, text = "0890213234235")
-            ProfileItem(icon = Icons.Default.Email, text = "Kuro@gmail.com")
+            ProfileItem(icon = Icons.Default.Person, text = user?.username ?: "No name")
+            ProfileItem(icon = Icons.Default.Phone, text = user?.noHp ?: "-")
+            ProfileItem(icon = Icons.Default.Email, text = user?.email ?: "-")
+            ProfileItem(icon = Icons.Default.Email, text = user?.role ?: "-")
             Box(
-                modifier = Modifier.clickable { onRegistStoreClick()  }
+                modifier = Modifier.clickable { onTokoClick()  }
             ) {
-                ProfileItem(icon = Icons.Default.ShoppingCart, text = "Pendaftaran Toko")
+                ProfileItem(icon = Icons.Default.ShoppingCart, text = textToko)
 
             }
             ProfileItem(icon = Icons.Default.List, text = "Pilihan Toko")
@@ -150,7 +166,9 @@ fun ProfileItem(icon: ImageVector, text: String) {
 fun ProfileScreenPreview() {
     ProfileScreen(
         onBackClick = {},
-        onRegistStoreClick = {}
+        onRegistStoreClick = {},
+        user = null,
+        onGoToMyStore = {}
     )
 }
 

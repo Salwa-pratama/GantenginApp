@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 
 
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +63,6 @@ fun AppRoot(app: Application = androidx.compose.ui.platform.LocalContext.current
             val navController = rememberNavController()
             AppNavHost(
                 navController = navController,
-                currentUser = currentUser,
                 onUserLogin = { user ->
                     currentUser = user
                 }

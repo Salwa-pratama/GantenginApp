@@ -34,27 +34,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.res.painterResource
-
 import com.gantenginapp.apps.R
+import com.google.android.gms.maps.model.LatLng
 
-class BarberDetailActivity : ComponentActivity() {
-
+class BarberDetailActivityMyStore : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            BarberDetailScreen()
-
+            MyStore()
         }
-
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarberDetailScreen(
-
-) {
-
+fun MyStore() {
     var selectedTab by remember { mutableStateOf("Antrian") }
     Scaffold(
         topBar = {
@@ -147,16 +141,16 @@ fun BarberDetailScreen(
 
             // Konten Berdasarkan Tab
             when (selectedTab) {
-                "Antrian" -> AntrianTable()
-                "Style" -> StyleList()
-                "Lokasi" -> LokasiMap()
+                "Antrian" -> AntrianTableMyStore()
+                "Style" -> StyleListMyStore()
+                "Lokasi" -> LokasiMapMyStore()
             }
         }
     }
 }
 
 @Composable
-fun AntrianTable() {
+fun AntrianTableMyStore() {
     val data = listOf(
         Triple("Akbar", "00:30", "Selesai"),
         Triple("Faiz", "01:00", "Proses"),
@@ -222,7 +216,7 @@ fun AntrianTable() {
 }
 
 @Composable
-fun StyleList() {
+fun StyleListMyStore() {
     val styles = listOf("Style 1", "Style 2", "Style 3", "Style 4", "Style 5", "Style 6")
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -240,7 +234,7 @@ fun StyleList() {
                 Text(
                     text = style,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(androidx.compose.ui.Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center)
                 )
 
             }
@@ -251,8 +245,8 @@ fun StyleList() {
 }
 
 @Composable
-fun LokasiMap() {
-    val jakarta = com.google.android.gms.maps.model.LatLng(-6.200000, 106.816666)
+fun LokasiMapMyStore() {
+    val jakarta = LatLng(-6.200000, 106.816666)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(jakarta, 14f)
     }
@@ -290,7 +284,7 @@ fun LokasiMap() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun BarberDetailScreenPreview() {
-    BarberDetailScreen()
+fun BarberDetailMyStoreScreenPreview() {
+    MyStore()
 }
 

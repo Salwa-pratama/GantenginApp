@@ -7,4 +7,6 @@ object Routes {
 
     const val DETAIL_STORE = "detail_store"
     const val REGIST_STORE = "regist_store"
+    const val MY_STORE = "mystore"
+
 }

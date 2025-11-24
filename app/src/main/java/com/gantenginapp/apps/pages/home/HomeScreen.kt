@@ -25,19 +25,26 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.gantenginapp.apps.pages.allPages.ProfileActivity
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.gantenginapp.apps.remote.AllStores
+import com.gantenginapp.apps.viewmodel.StoreViewModes
+import androidx.compose.foundation.lazy.items
+import com.gantenginapp.apps.remote.RetrofitClient
+import androidx.compose.runtime.getValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
-    username: String,
+    viewModel: StoreViewModes ,
     onProfileClick: () -> Unit,
     onDetailClick: () -> Unit
 
 ) {
+    val stores by viewModel.storeData.collectAsState()
     val context = LocalContext.current
     Scaffold(
         containerColor = Color.White,
@@ -47,9 +54,8 @@ fun HomeContent(
             CenterAlignedTopAppBar(
                 modifier = Modifier.background(Color.White),
                 title = {
-
                  Row(
-                     modifier = Modifier.fillMaxWidth(),
+                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                      horizontalArrangement = Arrangement.SpaceBetween,
                      verticalAlignment = Alignment.CenterVertically,
 
@@ -70,11 +76,11 @@ fun HomeContent(
                          OutlinedTextField (
                              value = "",
                              onValueChange = {/* Handle value change */},
-                             label = {Text(text = "Cari toko....")},
+                             label = {Text(text = "Cari toko...." , fontSize = 8.sp)},
                              leadingIcon = {Icon(Icons.Default.Search, contentDescription = null)},
-                             modifier = Modifier.width(250.dp),
+                             modifier = Modifier.width(200.dp).height(20.dp),
                              shape = RoundedCornerShape(30.dp),
-                             textStyle = LocalTextStyle.current.copy(fontSize = 10.sp),
+                             textStyle = LocalTextStyle.current.copy(fontSize = 4.sp),
                              singleLine = true
                          )
 
@@ -133,11 +139,24 @@ fun HomeContent(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(20) {
-                HorizontalCardPlaceholder(
-                    onDetailClick = onDetailClick
-                )
+            if (stores.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(top = 100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else {
+                items(stores) {store ->
+                    HorizontalCardPlaceholder(
+                        store = store,
+                        onDetailClick = onDetailClick
+                    )
+                }
             }
+
         }
 
     }
@@ -146,6 +165,7 @@ fun HomeContent(
 
 @Composable
 fun HorizontalCardPlaceholder(
+    store: AllStores,
     onDetailClick: () -> Unit = {}
 ) {
     Card(
@@ -190,7 +210,7 @@ fun HorizontalCardPlaceholder(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Nama Toko",
+                        text = store.name,
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
@@ -207,7 +227,7 @@ fun HorizontalCardPlaceholder(
 
                 ) {
                     Text(
-                        text = "Rp.10000"
+                        text = "Rp.${store.price}"
                     )
 
                     Button(
@@ -225,7 +245,6 @@ fun HorizontalCardPlaceholder(
 
             }
 
-
         }
 
     }
@@ -235,8 +254,9 @@ fun HorizontalCardPlaceholder(
 @Preview(showBackground = true , showSystemUi = true)
 @Composable
 fun HomeContentPreview() {
+    val vm = StoreViewModes(api = RetrofitClient.instance)
     HomeContent(
-        username = "Ananda",
+        viewModel = vm,
         onProfileClick = {},
         onDetailClick = {}
         )

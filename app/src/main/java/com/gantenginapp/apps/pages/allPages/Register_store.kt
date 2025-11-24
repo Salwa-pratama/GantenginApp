@@ -17,14 +17,67 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.gantenginapp.apps.R
 import com.gantenginapp.apps.model.User
 import com.gantenginapp.apps.ui.theme.ColorCustom
+// API
+import com.gantenginapp.apps.remote.RetrofitClient
+import kotlinx.coroutines.launch
+import com.gantenginapp.apps.remote.RegistStoreResponse
+import com.gantenginapp.apps.remote.RegistStoreRequest
 @Composable
 fun RegisterStoreScreen(
-
+    user: User?,
+    onRegisterStoreSuccess: () -> Unit
 ) {
-
+    // Data Dikirim ke server
     var name by remember { mutableStateOf("") }
     var noHp by remember {mutableStateOf("")}
-    var jamKerja by remember { mutableStateOf("") }
+    var jamBuka by remember { mutableStateOf("") }
+    var jamTutup by remember { mutableStateOf("") }
+
+    // animasi Loading
+    var loading by remember {mutableStateOf(value = false)}
+
+    // ERROR STATE
+    var errorName by remember { mutableStateOf("") }
+    var errorNoHp by remember { mutableStateOf("") }
+    var errorJamBuka by remember { mutableStateOf("") }
+    var errorJamTutup by remember { mutableStateOf("") }
+    var apiError by remember { mutableStateOf("") }
+
+
+    // Library Coroutine
+    val coroutineScope = rememberCoroutineScope ()
+
+    val api = RetrofitClient.instance
+
+    // Fungsi Validasi
+    fun validate() : Boolean {
+        var valid = true
+
+        errorName = if (name.isEmpty()) {
+            valid = false; "Nama Toko Tidak Boleh kosong"
+        } else ""
+
+        errorNoHp = if (noHp.isEmpty()) {
+            valid = false; "Nomor HP Tidak Boleh kosong"
+        } else ""
+
+        errorJamBuka = if (jamBuka.isEmpty()) {
+            valid = false; "Jam Buka Tidak Boleh kosong"
+        } else ""
+
+        errorJamTutup = if (jamTutup.isEmpty()) {
+            valid = false; "Jam Tutup Tidak Boleh kosong"
+        } else ""
+
+
+        return valid
+
+
+    }
+
+
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,11 +131,11 @@ fun RegisterStoreScreen(
                 ) 
             )
             Spacer(Modifier.height(16.dp))
-            // Username
+            // Name
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Username") },
+                label = { Text("Store Name") },
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
@@ -97,6 +150,10 @@ fun RegisterStoreScreen(
                     focusedContainerColor = ColorCustom.bg,
                 )
             )
+
+            if (errorName.isNotEmpty())
+                Text(errorName, color = MaterialTheme.colorScheme.error)
+
             Spacer(Modifier.height(8.dp))
             // No Hp
             TextField(
@@ -117,34 +174,118 @@ fun RegisterStoreScreen(
                     focusedContainerColor = ColorCustom.bg,
                 )
             )
+
+            if (errorNoHp.isNotEmpty())
+                Text(errorNoHp, color = MaterialTheme.colorScheme.error)
+
             Spacer(Modifier.height(8.dp))
-            // noHp
-            TextField(
-                value = jamKerja,
-                onValueChange = { noHp = it },
-                label = { Text("Jam Kerja") },
-                shape = RoundedCornerShape(12.dp),
+            // Jam Kerja
+            Row (
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = ColorCustom.black,
-                    unfocusedTextColor = ColorCustom.black,
-                    cursorColor = ColorCustom.black,
-                    focusedIndicatorColor = ColorCustom.black,
-                    unfocusedIndicatorColor = ColorCustom.black,
-                    focusedLabelColor = ColorCustom.black,
-                    unfocusedLabelColor = ColorCustom.black,
-                    unfocusedContainerColor = ColorCustom.bg,
-                    focusedContainerColor = ColorCustom.bg,
-                )
-            )
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Jam Buka
+                Column(Modifier.height(100.dp).weight(1f)) {
+                    TextField(
+                        value = jamBuka,
+                        onValueChange = { jamBuka = it },
+                        label = { Text("Jam Buka (ex: 09:00)") },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = ColorCustom.black,
+                            unfocusedTextColor = ColorCustom.black,
+                            cursorColor = ColorCustom.black,
+                            focusedIndicatorColor = ColorCustom.black,
+                            unfocusedIndicatorColor = ColorCustom.black,
+                            focusedLabelColor = ColorCustom.black,
+                            unfocusedLabelColor = ColorCustom.black,
+                            unfocusedContainerColor = ColorCustom.bg,
+                            focusedContainerColor = ColorCustom.bg,
+                        )
+                    )
+                    if (errorJamBuka.isNotEmpty())
+                        Text(errorJamBuka, color = MaterialTheme.colorScheme.error)
+
+                }
+
+                // Jam Tutup
+                Column(Modifier.height(100.dp).weight(1f)) {
+                    TextField(
+                        value = jamTutup,
+                        onValueChange = { jamTutup = it },
+                        label = { Text("Jam Tutup (ex: 22:00)") },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = ColorCustom.black,
+                            unfocusedTextColor = ColorCustom.black,
+                            cursorColor = ColorCustom.black,
+                            focusedIndicatorColor = ColorCustom.black,
+                            unfocusedIndicatorColor = ColorCustom.black,
+                            focusedLabelColor = ColorCustom.black,
+                            unfocusedLabelColor = ColorCustom.black,
+                            unfocusedContainerColor = ColorCustom.bg,
+                            focusedContainerColor = ColorCustom.bg,
+                        )
+                    )
+                    if (errorJamTutup.isNotEmpty())
+                        Text(errorJamTutup, color = MaterialTheme.colorScheme.error)
+                }
+
+
+            }
+
             Spacer(Modifier.height(16.dp))
+
+            if (apiError.isNotEmpty())
+                Text(apiError, color = MaterialTheme.colorScheme.error)
             // Tombol Register
             Button(
                 onClick = {
+                    if (validate()) {
+                        loading = true
+                        apiError = ""
+
+                        coroutineScope.launch {
+                            try {
+                                val response: RegistStoreResponse = api.registStore(
+                                    RegistStoreRequest(
+                                        id = user?.id ?: "",
+                                        name = name,
+                                        noHp = noHp,
+                                        jamBuka = jamBuka,
+                                        jamTutup = jamTutup
+                                    )
+                                )
+                                if (response.status == "success")  {
+                                    // RESET FORM
+                                    name = ""
+                                    noHp = ""
+                                    jamBuka = ""
+                                    jamTutup = ""
+                                    // PASS DATA ke ATAS
+                                    onRegisterStoreSuccess()
+                                    apiError = response.message
+                                } else {
+                                    apiError = response.message
+                                }
+
+                            } catch (e:Exception) {
+                                apiError = e.message ?: "Error tidak diketahui"
+
+                            } finally {
+                                loading = false
+
+
+                            }
+                        }
+                    }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !loading
             ) {
-                Text("Register")
+                Text(if (loading) "Loading..." else "Register..")
             }
             Spacer(Modifier.height(8.dp))
         }
@@ -160,6 +301,7 @@ fun RegisterStoreScreen(
 @Composable
 fun PreviewRegisterScreen() {
     RegisterStoreScreen(
-
+        user = null,
+        onRegisterStoreSuccess = {}
     )
 }
